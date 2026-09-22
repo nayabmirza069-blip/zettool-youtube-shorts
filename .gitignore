@@ -1,0 +1,14 @@
+# Generated configs (written from GitHub Secrets at runtime)
+config.json
+youtube_config.json
+client_secret.json
+youtube_token.json
+
+# Local artifacts
+shorts/
+shorts_work/
+_youtube_state.json
+*.log
+__pycache__/
+*.pyc
+.venv/

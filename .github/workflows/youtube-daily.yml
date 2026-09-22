@@ -1,0 +1,48 @@
+name: ZetTool YouTube Shorts
+
+# Runs 2x/day IST (8:00 AM and 8:00 PM) = UTC 02:30 and 14:30.
+# Also allows manual "Run workflow" from the Actions tab.
+
+on:
+  schedule:
+    - cron: '30 2,14 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  shorts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Write runtime configs from secrets
+        shell: bash
+        env:
+          SITE_CONFIG: ${{ secrets.SITE_CONFIG }}
+          YT_CONFIG: ${{ secrets.YT_CONFIG }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_TOKEN: ${{ secrets.YT_TOKEN }}
+        run: |
+          cat > config.json <<EOF
+          ${SITE_CONFIG}
+          EOF
+          cat > youtube_config.json <<EOF
+          ${YT_CONFIG}
+          EOF
+          echo "${YT_CLIENT_SECRET}" | base64 --decode > client_secret.json
+          echo "${YT_TOKEN}" | base64 --decode > youtube_token.json
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate and upload Short
+        env:
+          YT_DETERMINISTIC_TOPIC: '1'
+        run: python youtube_agent.py
